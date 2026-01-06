@@ -19,7 +19,9 @@ function createWedgePath(centerX: number, centerY: number, radius: number, start
   return `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
 }
 
-export default function SpinningWheel({ options }: { options: string[] }) {
+export default function SpinningWheel() {
+  const [count, setCount] = useState(6);
+  const options = Array.from({ length: count }, (_, i) => `${i + 1}`);
   
   const data = options.map((option) => ({
     option    
@@ -28,7 +30,7 @@ export default function SpinningWheel({ options }: { options: string[] }) {
   const [mustSpin, setMustSpin] = useState(false);
   const [prizeNumber, setPrizeNumber] = useState(0);
   const [displayedOption, setDisplayedOption] = useState<string>(options[0] || '');
-  const [showWinner, setShowWinner] = useState(false);
+  const [showWinner, setShowWinner] = useState(true);
   const startY = useRef<number | null>(null);
   const startX = useRef<number | null>(null);
   const triggered = useRef(false);
@@ -128,6 +130,21 @@ export default function SpinningWheel({ options }: { options: string[] }) {
       <div style={{ textAlign: "center", marginTop: 12 }}>
         Swipe down to spin
       </div>
+       <div style={{ padding: 20 }}>
+      {/* Dropdown */}
+      <label>
+        Number of options:&nbsp;
+        <select
+          value={count}
+          onChange={(e) => setCount(Number(e.target.value))}
+        >
+          {Array.from({ length: 20 }, (_, i) => (
+            <option key={i} value={i + 1}>
+              {i + 1}
+            </option>
+          ))}
+        </select>
+      </label></div>
     </div>
   )
 }

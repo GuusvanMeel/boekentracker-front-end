@@ -15,7 +15,7 @@ function wedgePath(cx: number, cy: number, r: number, start: number, end: number
 
 export function WheelOverlay({  totalOptions  }:{totalOptions : number}) {
   const id = useId();
-  const dots = totalOptions;
+  
   // Match the winner wedge dimensions
   const cx = 223;
   const cy = 225;
@@ -48,24 +48,23 @@ export function WheelOverlay({  totalOptions  }:{totalOptions : number}) {
     const arr = [];
     
     const dotR = r - 5;
-    for (let i = 0; i < dots; i++) {
-      const a = (i * 360) / dots;
+    for (let i = 0; i < totalOptions; i++) {
+      const a = totalOptions + (i * 360) / totalOptions;
       arr.push(polarToCartesian(cx, cy, dotR, a));
     }
     return arr;
-  }, [dots, r]);
+  }, [totalOptions, r]);
 
   const spokes = useMemo(() => {
     const arr = [];
-    const spokeCount = 24;
-    for (let i = 0; i < spokeCount; i++) {
-      const angle = (i * 360) / spokeCount;
-      const inner = polarToCartesian(cx, cy, 50, angle);
-      const outer = polarToCartesian(cx, cy, r - 10, angle);
+    for (let i = 0; i < totalOptions; i++) {
+      const angle = totalOptions + (i * 360) / totalOptions;
+      const inner = polarToCartesian(cx, cy, 0, angle);
+      const outer = polarToCartesian(cx, cy, r -10, angle);
       arr.push({ x1: inner.x, y1: inner.y, x2: outer.x, y2: outer.y });
     }
     return arr;
-  }, [r]);
+  }, [totalOptions, r]);
 
 
 
@@ -102,15 +101,32 @@ export function WheelOverlay({  totalOptions  }:{totalOptions : number}) {
           ))}
         </g>
         {/* Rim circles */}
-        <circle cx={cx} cy={cy} r={r - 3} fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth={2} />
-        <circle cx={cx} cy={cy} r={r - 30} fill="none" stroke="rgba(200,200,255,0.3)" strokeWidth={1.5} />
-        {/* Corner dots */}
+        {Array.from({ length: 12 }).map((_, i) => {
+  const radius = r - 80 + i * 10;      // smaller step = more lines
+  const opacity = 0.25 - i * 0.015;   // slower fade
+
+  return (
+    <circle
+      key={i}
+      cx={cx}
+      cy={cy}
+      r={radius}
+      fill="none"
+      stroke={`rgba(200,200,255,${opacity})`}
+      strokeWidth={1.2}
+    />
+  );
+})}
+
         <g>
           {dotPositions.map((p, i) => (
             <circle key={i} cx={p.x} cy={p.y} r={2.5} fill={i % 3 === 0 ? "#ffffff" : i % 3 === 1 ? "#e0e0ff" : "#c0c0ff"} opacity={0.7} />
           ))}
         </g>
       </g>
+       <circle cx={cx} cy={cy} r={r - 3} fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth={2} />
+       
+        {/* Corner dots */}
     </svg>
   );
 }
