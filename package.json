@@ -12,7 +12,6 @@
   "dependencies": {
     "next": "16.0.10",
     "react": "19.2.1",
-    "react-custom-roulette": "github:GuusvanMeel/react-custom-roulette",
     "react-custom-roulette-r19": "^2.0.3",
     "react-dom": "19.2.1"
   },
@@ -23,7 +22,6 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.0.10",
-    "patch-package": "^8.0.1",
     "postinstall-postinstall": "^2.1.0",
     "tailwindcss": "^4",
     "typescript": "^5"

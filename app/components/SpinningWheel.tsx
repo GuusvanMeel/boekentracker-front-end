@@ -1,7 +1,8 @@
 "use client"
 import { useRef, useState } from 'react';
-import { Wheel } from 'react-custom-roulette';
+import { Wheel } from 'react-custom-roulette-r19';
 import { WheelOverlay } from './wheelOverlay';
+import WinnerWedge from './WinnerWedge';
 
 // Helper function to create a wedge path
 function createWedgePath(centerX: number, centerY: number, radius: number, startAngle: number, endAngle: number) {
@@ -27,6 +28,7 @@ export default function SpinningWheel({ options }: { options: string[] }) {
   const [mustSpin, setMustSpin] = useState(false);
   const [prizeNumber, setPrizeNumber] = useState(0);
   const [displayedOption, setDisplayedOption] = useState<string>(options[0] || '');
+  const [showWinner, setShowWinner] = useState(false);
   const startY = useRef<number | null>(null);
   const startX = useRef<number | null>(null);
   const triggered = useRef(false);
@@ -38,8 +40,14 @@ export default function SpinningWheel({ options }: { options: string[] }) {
       const newPrizeNumber = Math.floor(Math.random() * data.length);
       setPrizeNumber(newPrizeNumber);
       setMustSpin(true);
+      setShowWinner(false); // Hide winner wedge when spinning starts
       setDisplayedOption(options[newPrizeNumber]);
     }
+  }
+  
+  const handleStopSpinning = () => {
+    setMustSpin(false);
+    setShowWinner(true); // Show winner wedge when spinning stops
   }
   
   const wedgeDeg = 360 / data.length;
@@ -101,49 +109,21 @@ export default function SpinningWheel({ options }: { options: string[] }) {
           backgroundColors={['silver', 'white']}
           radiusLineWidth={5}
           radiusLineColor='gray'
-          onStopSpinning={() => setMustSpin(false)}
+          onStopSpinning={handleStopSpinning}
           pointerProps={{style:{visibility: "hidden"}}}
           disableInitialAnimation={true}
         />
+        </div>
         <WheelOverlay
-          openingDeg={wedgeDeg}
-          overlayOpacity={1}
-          rotationOffsetDeg={-44}
+          totalOptions={options.length}
         />
         
-        {/* Result wedge overlay - perfectly centered in the opening */}
-        <svg
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            pointerEvents: "none",
-            zIndex: 45, // Behind overlay (50) but in front of wheel
-          }}
-          viewBox="0 0 440 440"
-        >
-          <path
-            d={wedgePath}
-            fill="white"
-            stroke="gray"
-            strokeWidth="5"
-          />
-          <text
-            x={textX}
-            y={textY}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fontSize="16"
-            fontWeight="bold"
-            fill="black"
-            transform={`rotate(${-44}, ${textX}, ${textY})`}
-          >
-            {displayedOption}
-          </text>
-        </svg>
-      </div>
+      {showWinner && (
+        <WinnerWedge 
+          totalOptions={options.length} 
+          winnerName={displayedOption}
+        />
+      )}
       
       <div style={{ textAlign: "center", marginTop: 12 }}>
         Swipe down to spin

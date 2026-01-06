@@ -1,5 +1,4 @@
-"use client";
-import React, { useId, useMemo } from "react";
+import React, { useId, useMemo } from 'react';
 
 function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
   const rad = (angleDeg * Math.PI) / 180;
@@ -14,136 +13,102 @@ function wedgePath(cx: number, cy: number, r: number, start: number, end: number
   return `M ${cx} ${cy} L ${s.x} ${s.y} A ${r} ${r} 0 ${largeArcFlag} 1 ${e.x} ${e.y} Z`;
 }
 
-export function WheelOverlay({
-  openingDeg,
-  overlayOpacity = 0.75, // slightly less harsh than 1
-  feather = 0.6,
-  rotationOffsetDeg = 0,
-  spokes = 18, // subtle "prize wheel" spokes
-  dots = 48,   // subtle bulbs around rim
-}: {
-  openingDeg: number;
-  overlayOpacity?: number;
-  feather?: number;
-  rotationOffsetDeg?: number;
-  spokes?: number;
-  dots?: number;
-}) {
+export function WheelOverlay({  totalOptions  }:{totalOptions : number}) {
   const id = useId();
+  const dots = totalOptions;
+  // Match the winner wedge dimensions
+  const cx = 223;
+  const cy = 225;
+  const r = 213;
+  
+  // Calculate opening angle based on number of options
+  const openingDeg = 360 / totalOptions -2;
+  
+  // Opening at 3 o'clock (0 degrees), centered
+  const start = -openingDeg / 2;
+  const end = openingDeg / 2;
 
-  // 0..100 viewBox coords
-  const cx = 50;
-  const cy = 50;
-  const r = 50.5;
+  const opening = wedgePath(cx, cy, r + 2, start, end);
 
-  const start = -openingDeg / 2 + rotationOffsetDeg;
-  const end = openingDeg / 2 + rotationOffsetDeg;
 
-  const opening = wedgePath(cx, cy, r + feather, start, end);
+  const triangles = useMemo(() => {
+    const arr = [];
+    const count = 32;
+    for (let i = 0; i < count; i++) {
+      const angle = (i * 360) / count;
+      const p1 = polarToCartesian(cx, cy, r - 10, angle - 5);
+      const p2 = polarToCartesian(cx, cy, r - 10, angle + 5);
+      const p3 = polarToCartesian(cx, cy, r - 25, angle);
+      arr.push({ p1, p2, p3 });
+    }
+    return arr;
+  }, [r]);
 
   const dotPositions = useMemo(() => {
-    const arr: Array<{ x: number; y: number }> = [];
-    const dotR = 46.8; // near rim
+    const arr = [];
+    
+    const dotR = r - 5;
     for (let i = 0; i < dots; i++) {
       const a = (i * 360) / dots;
-      const p = polarToCartesian(cx, cy, dotR, a);
-      arr.push({ x: p.x, y: p.y });
+      arr.push(polarToCartesian(cx, cy, dotR, a));
     }
     return arr;
-  }, [dots]);
+  }, [dots, r]);
 
-  const spokeLines = useMemo(() => {
-    const arr: Array<{ x1: number; y1: number; x2: number; y2: number }> = [];
-    const inner = 12;
-    const outer = 44.5;
-    for (let i = 0; i < spokes; i++) {
-      const a = (i * 360) / spokes;
-      const p1 = polarToCartesian(cx, cy, inner, a);
-      const p2 = polarToCartesian(cx, cy, outer, a);
-      arr.push({ x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y });
+  const spokes = useMemo(() => {
+    const arr = [];
+    const spokeCount = 24;
+    for (let i = 0; i < spokeCount; i++) {
+      const angle = (i * 360) / spokeCount;
+      const inner = polarToCartesian(cx, cy, 50, angle);
+      const outer = polarToCartesian(cx, cy, r - 10, angle);
+      arr.push({ x1: inner.x, y1: inner.y, x2: outer.x, y2: outer.y });
     }
     return arr;
-  }, [spokes]);
+  }, [r]);
+
+
 
   return (
-    <svg
-      viewBox="0 0 100 100"
-      preserveAspectRatio="xMidYMid meet"
-      style={{
-        position: "absolute",
-        inset: 0,
-        width: "100%",
-        height: "100%",
-        pointerEvents: "none",
-        zIndex: 50,
-      }}
-    >
-      <defs>
-        {/* Soft silver-ish highlight gradient for rim strokes */}
-        <radialGradient id={`rim-${id}`} cx="50%" cy="45%" r="65%">
-          <stop offset="0%" stopColor="rgba(255,255,255,0.35)" />
-          <stop offset="60%" stopColor="rgba(255,255,255,0.10)" />
-          <stop offset="100%" stopColor="rgba(0,0,0,0.15)" />
-        </radialGradient>
-      </defs>
-
+    <svg width={440} height={440} viewBox="0 0 440 440" style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 20 }}>
       <mask id={`mask-${id}`}>
-        <rect width="100" height="100" fill="white" />
+        <rect width="440" height="440" fill="white" />
         <path d={opening} fill="black" />
       </mask>
-
-      {/* Base dimming overlay */}
-      <circle
-        cx={cx}
-        cy={cy}
-        r={r}
-        fill={`rgba(0,0,0,${overlayOpacity})`}
-        mask={`url(#mask-${id})`}
-      />
-
-      {/* Everything below is "decoration" on top of the overlay.
-          If you want the opening to stay totally clean, keep these masked as well. */}
+      <circle cx={cx} cy={cy} r={r}  mask={`url(#mask-${id})`} />
       <g mask={`url(#mask-${id})`}>
-        {/* Subtle rim rings */}
-        <circle
-          cx={cx}
-          cy={cy}
-          r={49.3}
-          fill="none"
-          stroke={`url(#rim-${id})`}
-          strokeWidth={1.2}
-          opacity={1}
-        />
-        <circle
-          cx={cx}
-          cy={cy}
-          r={47.2}
-          fill="none"
-          stroke="rgba(220,220,220,0.35)"
-          strokeWidth={0.9}
-        />
-
-        {/* Subtle radial spokes */}
-        <g stroke="rgba(255,255,255,0.10)" strokeWidth={0.6}>
-          {spokeLines.map((l, idx) => (
-            <line key={idx} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} />
+        {/* Triangular pattern */}
+        <g>
+          {triangles.map((t, i) => (
+            <polygon
+              key={i}
+              points={`${t.p1.x},${t.p1.y} ${t.p2.x},${t.p2.y} ${t.p3.x},${t.p3.y}`}
+              fill="none"
+              stroke={i % 2 === 0 ? "rgba(255,255,255,0.3)" : "rgba(200,200,255,0.3)"}
+              strokeWidth={1.5}
+            />
           ))}
         </g>
-
-        {/* Dots around the edge (bulbs), very subtle */}
+        {/* Spokes */}
+         <g stroke="rgba(255,255,255,0.15)" strokeWidth={1.5}>
+          {spokes.map((s, i) => (
+            <line
+              key={i}
+              x1={s.x1}
+              y1={s.y1}
+              x2={s.x2}
+              y2={s.y2}
+            />
+          ))}
+        </g>
+        {/* Rim circles */}
+        <circle cx={cx} cy={cy} r={r - 3} fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth={2} />
+        <circle cx={cx} cy={cy} r={r - 30} fill="none" stroke="rgba(200,200,255,0.3)" strokeWidth={1.5} />
+        {/* Corner dots */}
         <g>
-          {dotPositions.map((p, idx) => (
-  <circle
-    key={idx}
-    cx={p.x}
-    cy={p.y}
-    r={0.85}
-    fill={idx % 2 === 0 ? "#eeeeee" : "#bdbdbd"}
-    stroke="#ffffff"
-    strokeOpacity={0.15}
-    strokeWidth={0.25}
-  />
-))}
+          {dotPositions.map((p, i) => (
+            <circle key={i} cx={p.x} cy={p.y} r={2.5} fill={i % 3 === 0 ? "#ffffff" : i % 3 === 1 ? "#e0e0ff" : "#c0c0ff"} opacity={0.7} />
+          ))}
         </g>
       </g>
     </svg>
