@@ -1,21 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { Book } from "@/app/types/books";
+import AddBookButton from "@/app/components/addbookbutton";
 
-type Book = {
-  id: string;
-  title: string;
-  authors: string[];
-  firstPublishYear: number | null;
-  coverId: number | null;
-  pageCount: number | null;
-  languages: string[];
-  publishers: string[];
-  publishYears: number[];
-  subjects: string[];
-  ratingAverage: number | null;
-  ratingCount: number | null;
-  editionCount: number | null;
-};
+
 
 async function getBookDetails(workId: string): Promise<Book | null> {
   console.log("=== getBookDetails START ===");
@@ -56,6 +44,7 @@ export default async function BookDetailPage({
   if (!book) {
     notFound();
   }
+  
 
   const coverUrl = book.coverId
     ? `https://covers.openlibrary.org/b/id/${book.coverId}-L.jpg`
@@ -69,6 +58,7 @@ export default async function BookDetailPage({
       >
         ← Back to search
       </Link>
+      <AddBookButton book={book}></AddBookButton>
 
       <div style={{ display: "grid", gridTemplateColumns: "300px 1fr", gap: 40, marginTop: 20 }}>
         {/* Cover Image */}
