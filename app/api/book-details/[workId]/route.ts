@@ -16,16 +16,10 @@ export async function GET(
   
   // Await params in Next.js 15+
   const { workId: rawWorkId } = await params;
-  console.log("rawWorkId after await:", rawWorkId);
+
   
   let workId = rawWorkId.trim();
-  console.log("workId after trim:", workId);
-  
 
-  if (!workId.startsWith("/works/")) {
-    workId = `/works/${workId}`;
-  }
-  console.log("workId after normalization:", workId);
 
   const url = new URL(OPEN_LIBRARY_SEARCH_URL);
   url.searchParams.set("q", `key:${workId}`);

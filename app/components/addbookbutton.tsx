@@ -3,7 +3,7 @@ import { Book } from '../types/books';
 
 export default function AddBookButton({book}:{book : Book}) {
   const handleAddToCollection = async () => {
- console.log("DIT IS HET BOEK"+book );
+
     if (!book) return;
     
   // 1) Upsert book into books collection
