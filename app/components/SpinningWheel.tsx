@@ -101,24 +101,46 @@ export default function SpinningWheel() {
         userSelect: "none",
       }}
     >
-      <div style={{ position: "relative", width: 440, height: 440, transform: "rotate(44deg)", transformOrigin: "center" }}>
-        <Wheel
-          mustStartSpinning={mustSpin}
-          prizeNumber={prizeNumber}
-          data={data}
-          fontSize={10}
-          spinDuration={0.3}
-          backgroundColors={['silver', 'white']}
-          radiusLineWidth={5}
-          radiusLineColor='gray'
-          onStopSpinning={handleStopSpinning}
-          pointerProps={{style:{visibility: "hidden"}}}
-          disableInitialAnimation={true}
-        />
+       <div style={{ position: "relative", width: 440, height: 440 }}>
+        <div style={{ 
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: 440, 
+          height: 440, 
+          transform: "rotate(44deg)", 
+          transformOrigin: "center" 
+        }}>
+          <Wheel
+            mustStartSpinning={mustSpin}
+            prizeNumber={prizeNumber}
+            data={data}
+            fontSize={10}
+            spinDuration={0.3}
+            backgroundColors={['silver', 'white']}
+            radiusLineWidth={5}
+            radiusLineColor='gray'
+            onStopSpinning={handleStopSpinning}
+            pointerProps={{style:{visibility: "hidden"}}}
+            disableInitialAnimation={true}
+          />
         </div>
-        <WheelOverlay
-          totalOptions={options.length}
-        />
+        
+        <div style={{ 
+          position: "absolute", 
+          top: 0, 
+          left: 0, 
+          width: 440, 
+          height: 440,
+          
+          transformOrigin: "center",
+          pointerEvents: "none",
+          zIndex: 10 
+        }}>
+          <WheelOverlay totalOptions={options.length} />
+        </div>
+      
+       
         
       {showWinner && (
         <WinnerWedge 
@@ -126,6 +148,7 @@ export default function SpinningWheel() {
           winnerName={displayedOption}
         />
       )}
+      </div>
       
       <div style={{ textAlign: "center", marginTop: 12 }}>
         Swipe down to spin
@@ -137,9 +160,10 @@ export default function SpinningWheel() {
         <select
           value={count}
           onChange={(e) => setCount(Number(e.target.value))}
+          
         >
           {Array.from({ length: 20 }, (_, i) => (
-            <option key={i} value={i + 1}>
+            <option key={i} value={i + 1} style={{ color: "#111"}}>
               {i + 1}
             </option>
           ))}

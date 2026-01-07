@@ -66,7 +66,7 @@ const id = useId();
           <path d={opening} fill="black" />
         </mask>
       </defs>
-      <circle cx={cx} cy={cy} r={r} fill="rgba(30,30,50,0.85)" mask={`url(#mask-${id})`} />
+      <circle cx={cx} cy={cy} r={r} fill="rgba(30,30,50)" mask={`url(#mask-${id})`} />
       <g mask={`url(#mask-${id})`}>
         <g>
           {triangles.map((t, i) => (
