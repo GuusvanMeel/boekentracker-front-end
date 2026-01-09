@@ -11,18 +11,24 @@ export default function Home() {
     <BookSearchBar />
     <SpinningWheel />
     <div>
-    <Link  style={{
-      padding: "0.75rem 1.25rem",
-      borderRadius: "0.5rem",
-      backgroundColor: "#2563eb", // blue-600
-      color: "white",
-      fontWeight: 600,
-      border: "none",
-      cursor: "pointer",
-      transition: "transform 0.15s ease, box-shadow 0.15s ease",
-      boxShadow: "0 4px 10px rgba(37, 99, 235, 0.35)",
-    }}
-   href={"UserBooks"}></Link>
+       <Link
+         href="/LoveableAI"
+         style={{
+           padding: "0.75rem 1.25rem",
+           borderRadius: "0.5rem",
+           backgroundColor: "#2563eb", // blue-600
+           color: "white",
+           fontWeight: 600,
+           border: "none",
+           cursor: "pointer",
+           transition: "transform 0.15s ease, box-shadow 0.15s ease",
+           boxShadow: "0 4px 10px rgba(37, 99, 235, 0.35)",
+        display: "inline-block",
+        textDecoration: "none",
+      }}
+       >
+         Go to New Design
+       </Link>
     </div>
   </div>
 );}

@@ -27,18 +27,19 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ ok: true });
 }
-export async function GET(req: Request){
-const { searchParams } = new URL(req.url);
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
   const userId = searchParams.get("userId");
-    if(!userId){
-        return NextResponse.json(
-      { error: "userId, valid status required" },
+  if (!userId) {
+    return NextResponse.json(
+      { error: "userId required" },
       { status: 400 }
     );
-    }
-    const userBooks = await userBooksCol();
-    const books = await userBooks.find(
-        {userId : ObjectId}).toArray()
-        return NextResponse.json({items: books})
-    }
+  }
+  const userBooks = await userBooksCol();
+  const books = await userBooks
+    .find({ userId: new ObjectId(userId) })
+    .toArray();
+  return NextResponse.json({ items: books });
+}
 

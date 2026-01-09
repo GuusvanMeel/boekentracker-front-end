@@ -1,18 +1,17 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
+import Image from "next/image";
 import { Book } from "@/app/types/books";
 import AddBookButton from "@/app/components/addbookbutton";
+import { ChevronLeft } from "lucide-react";
+import BackToHomeButton from "@/app/components/BackToHomeButton";
 
-
-
-async function getBookDetails(workId: string): Promise<Book | null> {
-  console.log("=== getBookDetails START ===");
-  console.log("workId received:", workId);
-  
+export async function getBookDetails(workId: string): Promise<Book | null> {
   try {
-    const url = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/book-details/${workId}`;
+    const url = `${
+      process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+    }/api/book-details/${workId}`;
     console.log("Fetching URL:", url);
-    
+
     const response = await fetch(url, { cache: "no-store" });
     console.log("Response status:", response.status);
     console.log("Response ok:", response.ok);
@@ -37,162 +36,155 @@ export default async function BookDetailPage({
 }: {
   params: Promise<{ workId: string }>;
 }) {
-  // Await params in Next.js 15+
   const { workId } = await params;
   const book = await getBookDetails(workId);
 
-  if (!book) {
-    notFound();
-  }
-  
+  if (!book) notFound();
 
   const coverUrl = book.coverId
     ? `https://covers.openlibrary.org/b/id/${book.coverId}-L.jpg`
     : null;
 
+  // Safe fallbacks
+  const authors =
+    book.authors?.length && book.authors.length > 0
+      ? book.authors.join(", ")
+      : "Onbekende auteur";
+
+  const genres = (book.genres ?? []).slice(0, 8); // keep it tidy
+  const description = book.description ?? "Geen beschrijving beschikbaar.";
+
   return (
-    <div style={{ maxWidth: 1000, margin: "0 auto", padding: "40px 20px" }}>
-      <Link
-        href="/"
-        style={{ color: "#0066cc", textDecoration: "none", marginBottom: 20, display: "inline-block" }}
-      >
-        ← Back to search
-      </Link>
-      <AddBookButton book={book}></AddBookButton>
+    <div className="min-h-screen bg-linear-to-br from-cyan-50 via-blue-50 to-indigo-50 p-4">
+      {/* Top bar */}
+      <div className="flex justify-between items-center mb-6">
+        <BackToHomeButton></BackToHomeButton>
+        <AddBookButton book={book}></AddBookButton>
+      </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "300px 1fr", gap: 40, marginTop: 20 }}>
-        {/* Cover Image */}
-        <div>
-          {coverUrl ? (
-            <img
-              src={coverUrl}
-              alt={book.title}
-              style={{
-                width: "100%",
-                borderRadius: 8,
-                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-              }}
-            />
-          ) : (
-            <div
-              style={{
-                width: "100%",
-                aspectRatio: "2/3",
-                background: "#e5e7eb",
-                borderRadius: 8,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#6b7280",
-              }}
-            >
-              No cover available
-            </div>
-          )}
-        </div>
-
-        {/* Book Details */}
-        <div>
-          <h1 style={{ fontSize: 32, fontWeight: 700, marginBottom: 8 }}>
-            {book.title}
-          </h1>
-
-          {book.authors.length > 0 && (
-            <p style={{ fontSize: 20, color: "#6b7280", marginBottom: 20 }}>
-              by {book.authors.join(", ")}
-            </p>
-          )}
-
-          {/* Metadata Grid */}
-          <div style={{ display: "grid", gap: 16, marginBottom: 32 }}>
-            {book.firstPublishYear && (
-              <div>
-                <strong>First Published:</strong> {book.firstPublishYear}
-              </div>
-            )}
-
-            {book.pageCount && (
-              <div>
-                <strong>Pages:</strong> {book.pageCount}
-              </div>
-            )}
-
-            {book.editionCount && (
-              <div>
-                <strong>Editions:</strong> {book.editionCount}
-              </div>
-            )}
-
-            {book.ratingAverage && book.ratingCount && (
-              <div>
-                <strong>Rating:</strong> {book.ratingAverage.toFixed(2)} ({book.ratingCount} ratings)
-              </div>
-            )}
-
-            {book.languages.length > 0 && (
-              <div>
-                <strong>Languages:</strong> {book.languages.slice(0, 5).join(", ")}
-                {book.languages.length > 5 && ` +${book.languages.length - 5} more`}
-              </div>
-            )}
-
-            {book.publishers.length > 0 && (
-              <div>
-                <strong>Publishers:</strong> {book.publishers.slice(0, 3).join(", ")}
-                {book.publishers.length > 3 && ` +${book.publishers.length - 3} more`}
-              </div>
+      {/* Main card */}
+      <div className="bg-white rounded-3xl shadow-2xl overflow-hidden mb-4">
+        {/* Cover header */}
+        <div className="bg-linear-to-r from-cyan-400 to-blue-400 p-6 pb-20">
+          <div className="w-44 h-64 mx-auto rounded-xl shadow-2xl bg-white/20 backdrop-blur-sm overflow-hidden flex items-center justify-center">
+            {coverUrl ? (
+              <Image
+                src={coverUrl}
+                alt={book.title}
+                width={176}
+                height={256}
+                className="object-cover w-full h-full"
+                priority
+              />
+            ) : (
+              <div className="text-white font-bold text-xl">No cover</div>
             )}
           </div>
+        </div>
 
-          {/* Subjects */}
-          {book.subjects.length > 0 && (
-            <div>
-              <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 12 }}>
-                Subjects
-              </h2>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                {book.subjects.slice(0, 15).map((subject, idx) => (
+        {/* Body */}
+        <div className="px-6 -mt-12 pb-6">
+          {/* Title + meta */}
+          <div className="bg-white rounded-2xl shadow-lg p-5 mb-4">
+            <h1 className="text-2xl font-bold text-gray-800 mb-1">
+              {book.title}
+            </h1>
+
+            <p className="text-blue-600 mb-3">{authors}</p>
+
+            {genres.length > 0 && (
+              <div className="flex gap-2 flex-wrap">
+                {genres.map((subject) => (
                   <span
-                    key={idx}
-                    style={{
-                      padding: "6px 12px",
-                      background: "#f3f4f6",
-                      borderRadius: 6,
-                      fontSize: 14,
-                      color: "#374151",
-                    }}
+                    key={subject}
+                    className="bg-cyan-100 text-cyan-700 px-3 py-1 rounded-lg text-xs font-medium"
                   >
                     {subject}
                   </span>
                 ))}
-                {book.subjects.length > 15 && (
-                  <span style={{ padding: "6px 12px", color: "#6b7280", fontSize: 14 }}>
-                    +{book.subjects.length - 15} more
-                  </span>
-                )}
+              </div>
+            )}
+          </div>
+
+          {/* Status block (still placeholder data unless you have it) */}
+          <div className="bg-linear-to-br from-green-100 to-emerald-100 rounded-2xl p-5 mb-4 shadow-md">
+            <div className="flex justify-between items-center mb-4">
+              <span className="font-bold text-gray-800">Leesstatus</span>
+
+              {/* Replace these when you have real status in your DB */}
+              <span className="bg-green-500 text-white px-4 py-2 rounded-xl font-bold text-sm shadow-md">
+                Aan het lezen
+              </span>
+            </div>
+
+            <div className="flex gap-3 mb-4">
+              <div className="flex-1 bg-white rounded-xl p-3 shadow-sm">
+                <p className="text-xs text-gray-500 mb-1">Startdatum</p>
+                <p className="font-bold text-green-700">—</p>
+              </div>
+              <div className="flex-1 bg-white rounded-xl p-3 shadow-sm">
+                <p className="text-xs text-gray-500 mb-1">Einddatum</p>
+                <p className="font-bold text-gray-400">—</p>
               </div>
             </div>
-          )}
 
-          {/* Link to OpenLibrary */}
-          <div style={{ marginTop: 32 }}>
-            <a
-              href={`https://openlibrary.org${book.id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: "inline-block",
-                padding: "10px 20px",
-                background: "#0066cc",
-                color: "white",
-                borderRadius: 6,
-                textDecoration: "none",
-                fontWeight: 500,
-              }}
-            >
-              View on Open Library →
-            </a>
+            <button className="w-full bg-linear-to-r from-green-500 to-emerald-500 text-white rounded-xl py-3 font-bold shadow-md">
+              Markeer als uitgelezen
+            </button>
           </div>
+
+          {/* Description */}
+          <div className="bg-gray-50 rounded-2xl p-5 mb-4">
+            <h3 className="font-bold text-gray-800 mb-2">Over dit boek</h3>
+            <p className="text-gray-600 text-sm leading-relaxed">
+              {description}
+            </p>
+          </div>
+
+          {/* Details grid */}
+          <div className="bg-gray-50 rounded-2xl p-5">
+            <h3 className="font-bold text-gray-800 mb-3">Boek Details</h3>
+
+            <div className="grid grid-cols-2 gap-3">
+              {book.pageCount ? (
+                <div className="bg-white rounded-xl p-3 shadow-sm">
+                  <p className="text-xs text-gray-500 mb-1">Pagina&apos;s</p>
+                  <p className="font-bold text-cyan-600">
+                    {book.pageCount}
+                  </p>
+                </div>
+              ) : null}
+
+              {book.publishYear ? (
+                <div className="bg-white rounded-xl p-3 shadow-sm">
+                  <p className="text-xs text-gray-500 mb-1">Jaar</p>
+                  <p className="font-bold text-blue-600">
+                    {book.publishYear}
+                  </p>
+                </div>
+              ) : null}
+
+              {book.publisher ? (
+                <div className="bg-white rounded-xl p-3 shadow-sm">
+                  <p className="text-xs text-gray-500 mb-1">Uitgever</p>
+                  <p className="font-bold text-indigo-600 text-sm">
+                    {book.publisher}
+                  </p>
+                </div>
+              ) : null}
+
+              {book.isbn ? (
+                <div className="bg-white rounded-xl p-3 shadow-sm">
+                  <p className="text-xs text-gray-500 mb-1">ISBN</p>
+                  <p className="font-bold text-purple-600 text-xs">
+                    {book.isbn}
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          </div>
+
+        
         </div>
       </div>
     </div>

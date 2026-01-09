@@ -4,27 +4,6 @@ import { Book } from '../types/books';
 export default function AddBookButton({book}:{book : Book}) {
   const handleAddToCollection = async () => {
 
-    if (!book) return;
-    
-  // 1) Upsert book into books collection
-  const bookRes = await fetch("/api/books", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      key: book.id,
-      title: book.title,
-      author_name: book.authors,
-      first_publish_year: book.publishYears,
-      cover_i: book.coverId,
-    }),
-  });
-
-  if (!bookRes.ok) {
-    console.error(await bookRes.json());
-    alert("Failed to save book");
-    return;
-  }
-
   // 2) Add book to user's list with status READING
   const userBookRes = await fetch("/api/user-books", {
     method: "POST",

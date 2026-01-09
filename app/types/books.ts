@@ -1,15 +1,18 @@
 export type Book = {
   id: string;
+
   title: string;
   authors: string[];
-  firstPublishYear: number | null;
+
+  description: string | null;
+
   coverId: number | null;
+
+  isbn: string | null;
   pageCount: number | null;
-  languages: string[];
-  publishers: string[];
-  publishYears: number[];
-  subjects: string[];
-  ratingAverage: number | null;
-  ratingCount: number | null;
-  editionCount: number | null;
+
+  publishYear: number | null;
+  publisher: string | null;
+
+  genres: string[];
 };
