@@ -9,16 +9,77 @@ import { format, parseISO } from 'date-fns';
 import { nl } from 'date-fns/locale';
 import { cn } from '../../lib/utils';
 import { toast } from 'sonner';
+import { useEffect, useState } from 'react';
+
+interface ApiBook {
+  id: string;
+  title: string;
+  authors: string[];
+  coverId: number | null;
+  description: string | null;
+  isbn: string | null;
+  pageCount: number | null;
+  publishYear: number | null;
+  publisher: string | null;
+  genres: string[];
+}
 
 export default function BookDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { books, updateBook, markAsFinished, markAsStopped, startReading } = useBooks();
+  const [apiBook, setApiBook] = useState<ApiBook | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(false);
 
   const id = params.id as string;
-  const book = books.find((b) => b.id === id);
+  const localBook = books.find((b) => b.id === id);
 
-  if (!book) {
+  // Fetch from API if book is not in local list
+  useEffect(() => {
+    if (!localBook && id) {
+      setIsLoading(true);
+      setError(false);
+      
+      const fetchBook = async () => {
+        try {
+          const url = `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/api/book-details/${id}`;
+          const response = await fetch(url, { cache: "no-store" });
+          
+          if (!response.ok) {
+            setError(true);
+            return;
+          }
+          
+          const data = await response.json();
+          if (data.book) {
+            setApiBook(data.book);
+          } else {
+            setError(true);
+          }
+        } catch (err) {
+          console.error("Failed to fetch book:", err);
+          setError(true);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      
+      fetchBook();
+    }
+  }, [id, localBook]);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-muted-foreground">Laden...</p>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error || (!localBook && !apiBook)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <p className="text-muted-foreground">Boek niet gevonden</p>
@@ -26,7 +87,25 @@ export default function BookDetailPage() {
     );
   }
 
+  // Determine which book data to use
+  const book = localBook || apiBook;
+  if (!book) return null;
+
+  const isTrackedBook = !!localBook;
+  
+  // Get cover URL
+  const getCoverUrl = () => {
+    if (localBook?.coverUrl) return localBook.coverUrl;
+    if (apiBook?.coverId) return `https://covers.openlibrary.org/b/id/${apiBook.coverId}-L.jpg`;
+    return 'https://via.placeholder.com/112x160?text=📚';
+  };
+
   const handleStatusChange = (newStatus: BookStatus) => {
+    if (!isTrackedBook) {
+      toast.error('Voeg dit boek eerst toe aan je lijst');
+      return;
+    }
+    
     if (newStatus === 'finished') {
       markAsFinished(book.id);
       toast.success('Gefeliciteerd met het uitgelezen boek! 🎉');
@@ -47,7 +126,9 @@ export default function BookDetailPage() {
   };
 
   const getStatusColor = () => {
-    switch (book.status) {
+    if (!isTrackedBook) return 'bg-secondary text-secondary-foreground';
+    
+    switch (localBook.status) {
       case 'reading': return 'bg-accent text-accent-foreground';
       case 'finished': return 'bg-primary/20 text-primary';
       case 'want-to-read': return 'bg-secondary text-secondary-foreground';
@@ -55,6 +136,15 @@ export default function BookDetailPage() {
       default: return 'bg-secondary text-secondary-foreground';
     }
   };
+
+  const displayTitle = localBook?.title || apiBook?.title || '';
+  const displayAuthor = localBook?.author || apiBook?.authors?.join(', ') || '';
+  const displayPageCount = localBook?.pageCount || apiBook?.pageCount;
+  const displayYear = localBook?.publishedYear || apiBook?.publishYear;
+  const displayDescription = localBook?.description || apiBook?.description;
+  const displayPublisher = localBook?.publisher || apiBook?.publisher;
+  const displayIsbn = localBook?.isbn || apiBook?.isbn;
+  const displayTags = localBook?.tags || apiBook?.genres?.slice(0, 5) || [];
 
   return (
     <div className="min-h-screen bg-background pb-8">
@@ -68,12 +158,14 @@ export default function BookDetailPage() {
             <ChevronLeft className="w-5 h-5 text-foreground" />
           </button>
           <div className="flex-1 min-w-0">
-            <h1 className="font-medium text-sm truncate">{book.title}</h1>
-            <p className="text-xs text-muted-foreground truncate">{book.author}</p>
+            <h1 className="font-medium text-sm truncate">{displayTitle}</h1>
+            <p className="text-xs text-muted-foreground truncate">{displayAuthor}</p>
           </div>
-          <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium", getStatusColor())}>
-            {statusLabels[book.status]}
-          </span>
+          {isTrackedBook && (
+            <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium", getStatusColor())}>
+              {statusLabels[localBook.status]}
+            </span>
+          )}
         </div>
       </div>
 
@@ -84,8 +176,8 @@ export default function BookDetailPage() {
           <div className="flex-shrink-0">
             <div className="w-28 h-40 rounded-lg overflow-hidden shadow-lg">
               <img
-                src={book.coverUrl}
-                alt={book.title}
+                src={getCoverUrl()}
+                alt={displayTitle}
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = 'https://via.placeholder.com/112x160?text=📚';
@@ -96,20 +188,20 @@ export default function BookDetailPage() {
 
           {/* Quick Stats */}
           <div className="flex-1 py-1">
-            <h2 className="font-serif text-xl font-semibold leading-tight mb-1">{book.title}</h2>
-            <p className="text-muted-foreground text-sm mb-4">{book.author}</p>
+            <h2 className="font-serif text-xl font-semibold leading-tight mb-1">{displayTitle}</h2>
+            <p className="text-muted-foreground text-sm mb-4">{displayAuthor}</p>
             
             <div className="space-y-2">
-              {book.pageCount && (
+              {displayPageCount && (
                 <div className="flex items-center gap-2 text-sm">
                   <BookMarked className="w-4 h-4 text-primary/60" />
-                  <span className="text-muted-foreground">{book.pageCount} pagina's</span>
+                  <span className="text-muted-foreground">{displayPageCount} pagina's</span>
                 </div>
               )}
-              {book.publishedYear && (
+              {displayYear && (
                 <div className="flex items-center gap-2 text-sm">
                   <Calendar className="w-4 h-4 text-primary/60" />
-                  <span className="text-muted-foreground">{book.publishedYear}</span>
+                  <span className="text-muted-foreground">{displayYear}</span>
                 </div>
               )}
             </div>
@@ -118,10 +210,10 @@ export default function BookDetailPage() {
       </div>
 
       {/* Tags */}
-      {book.tags && book.tags.length > 0 && (
+      {displayTags.length > 0 && (
         <div className="px-4 pt-4">
           <div className="flex flex-wrap gap-1.5">
-            {book.tags.slice(0, 5).map((tag) => (
+            {displayTags.map((tag) => (
               <span 
                 key={tag} 
                 className="text-xs px-2.5 py-1 bg-primary/10 text-primary rounded-full"
@@ -133,101 +225,105 @@ export default function BookDetailPage() {
         </div>
       )}
 
-      {/* Reading Dates Card */}
-      <div className="px-4 pt-6">
-        <div className="bg-card rounded-2xl p-4 border border-border/50">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <p className="text-xs text-muted-foreground mb-0.5">Gestart</p>
-              <p className="text-sm font-medium">
-                {formatDate(book.startDate) || (
-                  <span className="text-muted-foreground/50">—</span>
-                )}
-              </p>
-            </div>
-            <div className="w-px h-8 bg-border mx-4" />
-            <div className="flex-1 text-right">
-              <p className="text-xs text-muted-foreground mb-0.5">
-                {book.status === 'stopped' ? 'Gestopt' : 'Uitgelezen'}
-              </p>
-              <p className="text-sm font-medium">
-                {formatDate(book.endDate) || (
-                  <span className="text-muted-foreground/50">—</span>
-                )}
-              </p>
+      {/* Reading Dates Card - Only show for tracked books */}
+      {isTrackedBook && (
+        <div className="px-4 pt-6">
+          <div className="bg-card rounded-2xl p-4 border border-border/50">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground mb-0.5">Gestart</p>
+                <p className="text-sm font-medium">
+                  {formatDate(localBook.startDate) || (
+                    <span className="text-muted-foreground/50">—</span>
+                  )}
+                </p>
+              </div>
+              <div className="w-px h-8 bg-border mx-4" />
+              <div className="flex-1 text-right">
+                <p className="text-xs text-muted-foreground mb-0.5">
+                  {localBook.status === 'stopped' ? 'Gestopt' : 'Uitgelezen'}
+                </p>
+                <p className="text-sm font-medium">
+                  {formatDate(localBook.endDate) || (
+                    <span className="text-muted-foreground/50">—</span>
+                  )}
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Action Button */}
-      <div className="px-4 pt-4">
-        {book.status === 'reading' && (
-          <div className="flex gap-2">
+      {/* Action Button - Only show for tracked books */}
+      {isTrackedBook && (
+        <div className="px-4 pt-4">
+          {localBook.status === 'reading' && (
+            <div className="flex gap-2">
+              <Button
+                onClick={() => handleStatusChange('finished')}
+                className="flex-1 h-11 rounded-xl bg-primary hover:bg-primary/90"
+              >
+                <Check className="w-4 h-4 mr-2" />
+                Uitgelezen
+              </Button>
+              <Button
+                onClick={() => handleStatusChange('stopped')}
+                variant="outline"
+                className="h-11 w-11 rounded-xl p-0"
+              >
+                <Pause className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
+
+          {localBook.status === 'want-to-read' && (
             <Button
-              onClick={() => handleStatusChange('finished')}
-              className="flex-1 h-11 rounded-xl bg-primary hover:bg-primary/90"
+              onClick={() => handleStatusChange('reading')}
+              className="w-full h-11 rounded-xl bg-accent hover:bg-accent/90 text-accent-foreground"
             >
-              <Check className="w-4 h-4 mr-2" />
-              Uitgelezen
+              <BookOpen className="w-4 h-4 mr-2" />
+              Begin met lezen
             </Button>
+          )}
+
+          {(localBook.status === 'stopped' || localBook.status === 'finished') && (
             <Button
-              onClick={() => handleStatusChange('stopped')}
+              onClick={() => handleStatusChange('reading')}
               variant="outline"
-              className="h-11 w-11 rounded-xl p-0"
+              className="w-full h-11 rounded-xl"
             >
-              <Pause className="w-4 h-4" />
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Opnieuw lezen
             </Button>
-          </div>
-        )}
-
-        {book.status === 'want-to-read' && (
-          <Button
-            onClick={() => handleStatusChange('reading')}
-            className="w-full h-11 rounded-xl bg-accent hover:bg-accent/90 text-accent-foreground"
-          >
-            <BookOpen className="w-4 h-4 mr-2" />
-            Begin met lezen
-          </Button>
-        )}
-
-        {(book.status === 'stopped' || book.status === 'finished') && (
-          <Button
-            onClick={() => handleStatusChange('reading')}
-            variant="outline"
-            className="w-full h-11 rounded-xl"
-          >
-            <RotateCcw className="w-4 h-4 mr-2" />
-            Opnieuw lezen
-          </Button>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {/* Description */}
-      {book.description && (
+      {displayDescription && (
         <div className="px-4 pt-6">
           <h3 className="text-sm font-medium mb-2">Over dit boek</h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            {book.description}
+            {displayDescription}
           </p>
         </div>
       )}
 
       {/* Additional Details */}
-      {(book.publisher || book.isbn) && (
+      {(displayPublisher || displayIsbn) && (
         <div className="px-4 pt-6">
           <h3 className="text-sm font-medium mb-3">Details</h3>
           <div className="space-y-2 text-sm">
-            {book.publisher && (
+            {displayPublisher && (
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Uitgever</span>
-                <span>{book.publisher}</span>
+                <span>{displayPublisher}</span>
               </div>
             )}
-            {book.isbn && (
+            {displayIsbn && (
               <div className="flex justify-between">
                 <span className="text-muted-foreground">ISBN</span>
-                <span className="font-mono text-xs">{book.isbn}</span>
+                <span className="font-mono text-xs">{displayIsbn}</span>
               </div>
             )}
           </div>

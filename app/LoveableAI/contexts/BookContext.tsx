@@ -49,8 +49,8 @@ export function BookProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function fetchBooks() {
       try {
-        // TODO: Replace with actual userId from auth/session
-        const userId = 'temp-user-id'; // This should come from your auth system
+       
+        const userId = '695e6dd0c7f71481c4d1db25'; // This should come from your auth system
         const response = await fetch(`/api/user-books?userId=${userId}`);
         
         if (response.ok) {
@@ -101,13 +101,13 @@ export function BookProvider({ children }: { children: ReactNode }) {
     
     // Update API
     try {
-      const userId = 'temp-user-id'; // TODO: Get from auth
+      const userId = '695e6dd0c7f71481c4d1db25'; // TODO: Get from auth
       await fetch('/api/user-books', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId,
-          bookKey: book.id.startsWith('/works/') ? book.id : `/works/${book.id}`,
+          bookKey: book.id,
           status: mapBookStatusToApiStatus(book.status),
         }),
       });
@@ -123,7 +123,7 @@ export function BookProvider({ children }: { children: ReactNode }) {
     
     // Update API
     try {
-      const userId = 'temp-user-id'; // TODO: Get from auth
+      const userId = '695e6dd0c7f71481c4d1db25'; // TODO: Get from auth
       const book = books.find(b => b.id === id);
       if (book) {
         await fetch('/api/user-books', {
@@ -131,7 +131,7 @@ export function BookProvider({ children }: { children: ReactNode }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             userId,
-            bookKey: book.id.startsWith('/works/') ? book.id : `/works/${book.id}`,
+            bookKey: book.id,
             status: mapBookStatusToApiStatus(updates.status || book.status),
           }),
         });
