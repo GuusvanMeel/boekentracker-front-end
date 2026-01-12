@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useBooks } from '../../contexts/BookContext';
 import { statusLabels, BookStatus } from '../../types/book';
 import { Button } from '../../components/ui/button';
-import { ChevronLeft, Check, BookOpen, Pause, RotateCcw, Calendar, BookMarked } from 'lucide-react';
+import { ChevronLeft, Check, BookOpen, Pause, RotateCcw, Calendar, BookMarked, Plus } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { nl } from 'date-fns/locale';
 import { cn } from '../../lib/utils';
@@ -27,10 +27,11 @@ interface ApiBook {
 export default function BookDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { books, updateBook, markAsFinished, markAsStopped, startReading } = useBooks();
+  const { books, updateBook, markAsFinished, markAsStopped, startReading, addBook } = useBooks();
   const [apiBook, setApiBook] = useState<ApiBook | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [showStatusSelector, setShowStatusSelector] = useState(false);
 
   const id = params.id as string;
   const localBook = books.find((b) => b.id === id);
@@ -100,6 +101,42 @@ export default function BookDetailPage() {
     return 'https://via.placeholder.com/112x160?text=📚';
   };
 
+  const handleAddBook = async (status: BookStatus) => {
+    if (!apiBook) return;
+
+    const newBook: any = {
+      id: apiBook.id,
+      title: apiBook.title,
+      author: apiBook.authors.join(', '),
+      authors: apiBook.authors,
+      coverUrl: apiBook.coverId ? `https://covers.openlibrary.org/b/id/${apiBook.coverId}-L.jpg` : undefined,
+      coverId: apiBook.coverId,
+      status,
+      pageCount: apiBook.pageCount || undefined,
+      publishedYear: apiBook.publishYear || undefined,
+      publishYear: apiBook.publishYear,
+      publisher: apiBook.publisher || undefined,
+      isbn: apiBook.isbn || undefined,
+      description: apiBook.description || undefined,
+      tags: apiBook.genres?.slice(0, 5) || [],
+      genres: apiBook.genres || [],
+      startDate: status === 'reading' ? new Date().toISOString() : undefined,
+      endDate: undefined,
+    };
+
+    await addBook(newBook);
+    setShowStatusSelector(false);
+    
+    const statusMessages = {
+      'reading': 'Veel leesplezier! 📖',
+      'want-to-read': 'Boek toegevoegd aan je lijst 📚',
+      'finished': 'Boek gemarkeerd als uitgelezen 🎉',
+      'stopped': 'Boek toegevoegd als gestopt',
+    };
+    
+    toast.success(statusMessages[status]);
+  };
+
   const handleStatusChange = (newStatus: BookStatus) => {
     if (!isTrackedBook) {
       toast.error('Voeg dit boek eerst toe aan je lijst');
@@ -146,6 +183,13 @@ export default function BookDetailPage() {
   const displayIsbn = localBook?.isbn || apiBook?.isbn;
   const displayTags = localBook?.tags || apiBook?.genres?.slice(0, 5) || [];
 
+  const statusOptions = [
+    { value: 'reading' as BookStatus, label: 'Begin met lezen', icon: BookOpen, color: 'bg-accent hover:bg-accent/90 text-accent-foreground' },
+    { value: 'want-to-read' as BookStatus, label: 'Wil lezen', icon: BookMarked, color: 'bg-secondary hover:bg-secondary/90' },
+    { value: 'finished' as BookStatus, label: 'Uitgelezen', icon: Check, color: 'bg-primary/20 hover:bg-primary/30 text-primary' },
+    { value: 'stopped' as BookStatus, label: 'Gestopt', icon: Pause, color: 'bg-muted hover:bg-muted/90 text-muted-foreground' },
+  ];
+
   return (
     <div className="min-h-screen bg-background pb-8">
       {/* Compact Header */}
@@ -173,7 +217,7 @@ export default function BookDetailPage() {
       <div className="px-4 pt-6">
         <div className="flex gap-5">
           {/* Cover */}
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <div className="w-28 h-40 rounded-lg overflow-hidden shadow-lg">
               <img
                 src={getCoverUrl()}
@@ -222,6 +266,51 @@ export default function BookDetailPage() {
               </span>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Add Book Section - Only show for non-tracked books */}
+      {!isTrackedBook && (
+        <div className="px-4 pt-6">
+          {!showStatusSelector ? (
+            <Button
+              onClick={() => setShowStatusSelector(true)}
+              className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-base font-medium"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Voeg toe aan mijn lijst
+            </Button>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium">Selecteer status</p>
+                <Button
+                  onClick={() => setShowStatusSelector(false)}
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 text-xs"
+                >
+                  Annuleer
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {statusOptions.map((option) => {
+                  const Icon = option.icon;
+                  return (
+                    <Button
+                      key={option.value}
+                      onClick={() => handleAddBook(option.value)}
+                      className={cn("h-16 rounded-xl flex flex-col gap-1 transition-all", option.color)}
+                      variant="outline"
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span className="text-xs font-medium">{option.label}</span>
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
