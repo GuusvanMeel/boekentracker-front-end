@@ -106,7 +106,7 @@ export default function BookSearchBar() {
           setTimeout(() => setOpen(false), 120);
         }}
         onKeyDown={onKeyDown}
-        placeholder="Search books..."
+        placeholder="Zoek boek..."
         style={{
           width: "100%",
           padding: "10px 12px",

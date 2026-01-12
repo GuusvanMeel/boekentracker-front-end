@@ -3,6 +3,8 @@
 import { Book, statusLabels } from '../types/book';
 import Link from 'next/link';
 import { cn } from '../lib/utils';
+import Image from 'next/image';
+import { useState } from 'react';
 
 interface BookCardProps {
   book: Book;
@@ -11,6 +13,7 @@ interface BookCardProps {
 }
 
 export function BookCard({ book, showStatus = true, compact = false }: BookCardProps) {
+const [src, setSrc] = useState(book.coverUrl || "/placeholder-book.png");
 
   const statusClass = {
     reading: 'status-reading',
@@ -28,16 +31,16 @@ export function BookCard({ book, showStatus = true, compact = false }: BookCardP
       )}
     >
       <div className={cn(
-        "flex-shrink-0 rounded-lg overflow-hidden shadow-soft",
+        "shrink-0 rounded-lg overflow-hidden shadow-soft",
         compact ? "w-16 h-24" : "w-20 h-28"
       )}>
-        <img
-          src={book.coverUrl}
+        <Image
+          src={src}
           alt={book.title}
+          width={compact ? 16 : 20}
+          height={compact ? 24 : 28}
           className="w-full h-full object-cover"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = 'https://via.placeholder.com/80x112?text=📚';
-          }}
+          onError={(e) => {setSrc("/book-placeholder.png")}}
         />
       </div>
       <div className="flex flex-col justify-center flex-1 min-w-0">

@@ -145,7 +145,7 @@ export function ReadingCalendar() {
                             alt={book.title}
                             className="w-full h-7 object-cover rounded shadow-sm group-hover:shadow-md transition-shadow"
                             onError={(e) => {
-                              (e.target as HTMLImageElement).src = 'https://via.placeholder.com/40x28?text=📖';
+                              (e.target as HTMLImageElement).src = '/book-placeholder.png';
                             }}
                           />
                           <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-accent rounded-full flex items-center justify-center shadow-sm">
@@ -168,7 +168,7 @@ export function ReadingCalendar() {
                             alt={book.title}
                             className="w-full h-7 object-cover rounded shadow-sm group-hover:shadow-md transition-shadow"
                             onError={(e) => {
-                              (e.target as HTMLImageElement).src = 'https://via.placeholder.com/40x28?text=📚';
+                              (e.target as HTMLImageElement).src = '/book-placegolder.png';
                             }}
                           />
                           <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-primary rounded-full flex items-center justify-center shadow-sm">

@@ -10,6 +10,7 @@ import { nl } from 'date-fns/locale';
 import { cn } from '../../lib/utils';
 import { toast } from 'sonner';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 interface ApiBook {
   id: string;
@@ -98,7 +99,7 @@ export default function BookDetailPage() {
   const getCoverUrl = () => {
     if (localBook?.coverUrl) return localBook.coverUrl;
     if (apiBook?.coverId) return `https://covers.openlibrary.org/b/id/${apiBook.coverId}-L.jpg`;
-    return 'https://via.placeholder.com/112x160?text=📚';
+    return '/book-placeholder.png';
   };
 
   const handleAddBook = async (status: BookStatus) => {
@@ -219,13 +220,12 @@ export default function BookDetailPage() {
           {/* Cover */}
           <div className="shrink-0">
             <div className="w-28 h-40 rounded-lg overflow-hidden shadow-lg">
-              <img
+              <Image
                 src={getCoverUrl()}
                 alt={displayTitle}
+                width={28}
+                height={40}
                 className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/112x160?text=📚';
-                }}
               />
             </div>
           </div>

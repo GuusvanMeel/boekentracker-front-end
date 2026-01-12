@@ -11,7 +11,7 @@ export type Book = {
   isbn: string | null;
   pageCount: number | null;
 
-  publishYear: number | null;
+  publishYear: number | undefined;
   publisher: string | null;
 
   genres: string[];

@@ -3,20 +3,13 @@
 import { useBooks } from '../contexts/BookContext';
 import { BookCard } from './BookCard';
 import { QuickActions } from './QuickActions';
-import { Button } from './ui/button';
-import { Moon } from 'lucide-react';
+
 import { toast } from 'sonner';
 
 export function CurrentBooks() {
-  const { getBooksByStatus, markAsNotReadToday } = useBooks();
+  const { getBooksByStatus} = useBooks();
   const readingBooks = getBooksByStatus('reading');
 
-  const handleNotReadToday = () => {
-    markAsNotReadToday();
-    toast('Geen probleem! Morgen is er weer een nieuwe dag 📖', {
-      icon: '🌙',
-    });
-  };
 
   if (readingBooks.length === 0) {
     return (
@@ -36,15 +29,6 @@ export function CurrentBooks() {
     <section className="mb-8">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-serif text-xl font-medium">Huidige boeken</h2>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleNotReadToday}
-          className="text-xs text-muted-foreground hover:text-foreground"
-        >
-          <Moon className="w-4 h-4 mr-1" />
-          Vandaag niet gelezen
-        </Button>
       </div>
       <div className="space-y-4">
         {readingBooks.map((book) => (

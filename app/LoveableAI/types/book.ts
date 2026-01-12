@@ -37,7 +37,7 @@ export function toBookWithStatus(baseBook: BaseBook, status: BookStatus = 'want-
     author: baseBook.authors[0] || 'Unknown',
     coverUrl: baseBook.coverId 
       ? `https://covers.openlibrary.org/b/id/${baseBook.coverId}-M.jpg`
-      : 'https://via.placeholder.com/200x300?text=📚',
+      : '/book-placeholder.png',
     startDate,
     endDate,
     tags: baseBook.genres,
