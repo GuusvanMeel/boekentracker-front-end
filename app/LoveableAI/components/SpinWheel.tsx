@@ -40,7 +40,7 @@ export function SpinWheel() {
 
   // Create wheel data from books
   const data = wantToReadBooks.map((book) => ({
-    option: `${book.title}`
+    option: book.title
   }));
 
   const createConfetti = useCallback((book: Book) => {
@@ -126,46 +126,49 @@ export function SpinWheel() {
       ))}
 
       <div className="book-card">
-        <div
-          onPointerDown={(e) => {
-            triggered.current = false;
-            startY.current = e.clientY;
-            startX.current = e.clientX;
-            (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-          }}
-          onPointerMove={(e) => {
-            if (startY.current == null || startX.current == null) return;
-            if (triggered.current) return;
-            const dy = e.clientY - startY.current;
-            const dx = Math.abs(e.clientX - startX.current);
-            if (dy > SPIN_SWIPE_PX && dx < MAX_HORIZONTAL_DRIFT) {
-              triggered.current = true;
-              handleSpinClick();
-            }
-          }}
-          onPointerUp={() => {
-            startY.current = null;
-            startX.current = null;
-            triggered.current = false;
-          }}
-          onPointerCancel={() => {
-            startY.current = null;
-            startX.current = null;
-            triggered.current = false;
-          }}
-          style={{
-            touchAction: "pan-x",
-            userSelect: "none",
-          }}
-        >
+        <div>
           <div className="flex justify-center mb-4">
-            <div style={{ position: "relative", width: 440, height: 440, margin: "0 auto" }}>
-              <div style={{ 
-                position: "absolute",
-                top: -10,
-                left: -10,
-                width: 440, 
-                height: 440, 
+            <div 
+              className="relative w-full max-w-110 aspect-square"
+              onPointerDown={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const centerX = rect.width / 2;
+                
+                // Only activate swipe on the right half
+                if (x < centerX) return;
+                
+                triggered.current = false;
+                startY.current = e.clientY;
+                startX.current = e.clientX;
+                (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+              }}
+              onPointerMove={(e) => {
+                if (startY.current == null || startX.current == null) return;
+                if (triggered.current) return;
+                const dy = e.clientY - startY.current;
+                const dx = Math.abs(e.clientX - startX.current);
+                if (dy > SPIN_SWIPE_PX && dx < MAX_HORIZONTAL_DRIFT) {
+                  triggered.current = true;
+                  handleSpinClick();
+                }
+              }}
+              onPointerUp={() => {
+                startY.current = null;
+                startX.current = null;
+                triggered.current = false;
+              }}
+              onPointerCancel={() => {
+                startY.current = null;
+                startX.current = null;
+                triggered.current = false;
+              }}
+              style={{
+                touchAction: "pan-y",
+                userSelect: "none",
+              }}
+            >
+              <div className="absolute inset-0" style={{ 
                 transform: "rotate(44deg)", 
                 transformOrigin: "center" 
               }}>
@@ -184,23 +187,14 @@ export function SpinWheel() {
                 />
               </div>
               
-              <div style={{ 
-                position: "absolute", 
-                top: -10, 
-                left: -10, 
-                width: 440, 
-                height: 440,
-                transformOrigin: "center",
-                pointerEvents: "none",
-                zIndex: 10 
-              }}>
+              <div className="absolute inset-0 pointer-events-none z-10">
                 <WheelOverlay totalOptions={wantToReadBooks.length} />
               </div>
             
               {showWinner && selectedBook && (
                 <WinnerWedge 
                   totalOptions={wantToReadBooks.length} 
-                  winnerName={`${prizeNumber + 1}`}
+                  winnerName={data[prizeNumber].option}
                 />
               )}
             </div>
@@ -208,7 +202,7 @@ export function SpinWheel() {
           
           <div className="text-center mb-4">
             <p className="text-sm text-muted-foreground">
-              Swipe down to spin • {wantToReadBooks.length} boeken in je leeslijst
+              Swipe down on the right side to spin • {wantToReadBooks.length} boeken in je leeslijst
             </p>
           </div>
         </div>
