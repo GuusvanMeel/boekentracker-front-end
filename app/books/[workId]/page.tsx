@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Book } from "@/app/types/books";
 import AddBookButton from "@/app/components/addbookbutton";
-import { ChevronLeft } from "lucide-react";
 import BackToHomeButton from "@/app/components/BackToHomeButton";
 
 async function getBookDetails(workId: string): Promise<Book | null> {

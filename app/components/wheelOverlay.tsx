@@ -66,7 +66,7 @@ const id = useId();
     <svg width={440} height={440} viewBox="0 0 440 440">
       <defs>
         <mask id={`mask-${id}`}>
-          <rect width="440" height="440" fill="white" />
+          <rect width="400" height="400" fill="white" />
           <path d={opening} fill="black" />
         </mask>
       </defs>
