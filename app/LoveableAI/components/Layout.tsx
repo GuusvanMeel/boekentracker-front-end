@@ -14,7 +14,7 @@ interface LayoutProps {
 
 export function Layout({ children, showSearch = true, title }: LayoutProps) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dhv bg-background">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-lg safe-top">
         <div className="px-4 pt-4 pb-3 max-w-md mx-auto">

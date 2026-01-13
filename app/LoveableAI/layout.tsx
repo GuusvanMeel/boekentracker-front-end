@@ -17,8 +17,8 @@ const merriweather = Merriweather({
 });
 
 export const metadata: Metadata = {
-  title: "Bookish Journey",
-  description: "Your personal reading companion",
+  title: "Boekenkast",
+  description: "Je persoonlijke digitale boekenkast",
 };
 
 export default function RootLayout({
