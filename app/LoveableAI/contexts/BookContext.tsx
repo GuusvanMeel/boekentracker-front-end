@@ -72,7 +72,7 @@ export function BookProvider({ children }: { children: ReactNode }) {
                     return toBookWithStatus(
                       baseBook,
                       mapStatusToBookStatus(userBook.status || 'WANT'),
-                      userBook.startDate,
+                      userBook.addedAt,
                       userBook.endDate
                     );
                   }
@@ -133,6 +133,7 @@ export function BookProvider({ children }: { children: ReactNode }) {
             userId,
             bookKey: book.id,
             status: mapBookStatusToApiStatus(updates.status || book.status),
+            endDate: updates.endDate ?? book.endDate
           }),
         });
       }

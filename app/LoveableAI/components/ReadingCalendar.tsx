@@ -101,7 +101,7 @@ export function ReadingCalendar() {
         <div className="grid grid-cols-7 gap-1">
           {/* Padding for days before month starts */}
           {Array.from({ length: paddingDays }).map((_, i) => (
-            <div key={`pad-${i}`} className="min-h-[72px]" />
+            <div key={`pad-${i}`} className="min-h-18" />
           ))}
           
           {/* Actual days */}
@@ -115,7 +115,7 @@ export function ReadingCalendar() {
               <div
                 key={dateKey}
                 className={cn(
-                  "min-h-[72px] rounded-lg p-1 transition-colors",
+                  "min-h-18 rounded-lg p-1 transition-colors",
                   isTodayDate && "bg-primary/10 ring-1 ring-primary/30",
                   !isTodayDate && hasEvents && "bg-secondary/50"
                 )}

@@ -117,7 +117,7 @@ export function SpinWheel() {
               )}
               style={{ animationDuration: '0.5s' }}
             >
-              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 backdrop-blur-sm flex items-center justify-center">
+              <div className="w-32 h-32 rounded-full bg-linear-to-br from-primary/20 to-primary/5 backdrop-blur-sm flex items-center justify-center">
                 <span className="text-4xl">📚</span>
               </div>
             </div>

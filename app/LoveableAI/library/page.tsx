@@ -29,7 +29,7 @@ export default function LibraryPage() {
   });
 
   return (
-    <Layout title="Bibliotheek" onSearch={setSearchQuery}>
+    <Layout title="Bibliotheek">
       <div className="py-4">
         {/* Filter Pills */}
         <div className="flex gap-2 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">

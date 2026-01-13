@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 const VALID = new Set(["WANT", "READING", "READ", "STOPPED"]);
 
 export async function POST(req: Request) {
-  const { userId, bookKey, status } = await req.json();
+  const { userId, bookKey, status, endDate } = await req.json();
 
   if (!userId || !bookKey || !VALID.has(status)) {
     return NextResponse.json(
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   await userBooks.updateOne(
     { userId: new ObjectId(userId), bookKey },
     {
-      $set: { status, updatedAt: new Date() },
+      $set: { status, updatedAt: new Date(),...(endDate && { endDate: new Date(endDate) }), },
       $setOnInsert: { addedAt: new Date() },
     },
     { upsert: true }
