@@ -63,7 +63,7 @@ const id = useId();
   }, [totalOptions, r]);
 
   return (
-    <svg width={300} height={300} viewBox="0 0 440 440">
+    <svg viewBox="0 0 440 440">
       <defs>
         <mask id={`mask-${id}`}>
           <rect width="440" height="440" fill="white" />

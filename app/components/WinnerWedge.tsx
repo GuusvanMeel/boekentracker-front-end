@@ -40,8 +40,6 @@ export default function WinnerWedge ({ totalOptions, winnerName }: {totalOptions
 
   return (
     <svg
-      width={300}
-      height={300}
       viewBox="0 0 440 440"
       style={{
         position: "absolute",
