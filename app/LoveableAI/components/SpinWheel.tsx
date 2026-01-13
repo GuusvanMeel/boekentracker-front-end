@@ -39,8 +39,8 @@ export function SpinWheel() {
   const MAX_HORIZONTAL_DRIFT = 60;
 
   // Create wheel data from books
-  const data = wantToReadBooks.map((book, index) => ({
-    option: `${index + 1}`
+  const data = wantToReadBooks.map((book) => ({
+    option: book.title
   }));
 
   const createConfetti = useCallback((book: Book) => {
@@ -215,7 +215,7 @@ export function SpinWheel() {
                 {showWinner && selectedBook && (
                   <WinnerWedge 
                     totalOptions={wantToReadBooks.length} 
-                    winnerName={`${prizeNumber + 1}`}
+                    winnerName={data[prizeNumber].option}
                   />
                 )}
               </div>
