@@ -35,7 +35,6 @@ export function SpinWheel() {
   const startY = useRef<number | null>(null);
   const startX = useRef<number | null>(null);
   const triggered = useRef(false);
-  const isRightSide = useRef(false);
   const SPIN_SWIPE_PX = 80;
   const MAX_HORIZONTAL_DRIFT = 60;
 
@@ -131,7 +130,7 @@ export function SpinWheel() {
           <div className="flex justify-center mb-4">
             <div 
               className="relative"
-              style={{ width: "100%", maxWidth: "440px", touchAction: "pan-y",
+              style={{ width: "100%", maxWidth: "440px", touchAction: "none",
                 userSelect: "none", }}
               onPointerDown={(e) => {
                 const rect = e.currentTarget.getBoundingClientRect();
@@ -139,21 +138,14 @@ export function SpinWheel() {
                 const centerX = rect.width / 2;
                 
                 // Only activate swipe on the right half
-                if (x < centerX) {
-                  isRightSide.current = false;
-                  return; // Allow normal scrolling on left side
-                }
+                if (x < centerX) return;
                 
-                // Right side: capture pointer and prevent scrolling
-                isRightSide.current = true;
                 triggered.current = false;
                 startY.current = e.clientY;
                 startX.current = e.clientX;
                 (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
               }}
               onPointerMove={(e) => {
-                // Only handle if we started on the right side
-                if (!isRightSide.current) return;
                 if (startY.current == null || startX.current == null) return;
                 if (triggered.current) return;
                 const dy = e.clientY - startY.current;
@@ -171,13 +163,11 @@ export function SpinWheel() {
                 startY.current = null;
                 startX.current = null;
                 triggered.current = false;
-                isRightSide.current = false;
               }}
               onPointerCancel={() => {
                 startY.current = null;
                 startX.current = null;
                 triggered.current = false;
-                isRightSide.current = false;
               }}
             
             >
