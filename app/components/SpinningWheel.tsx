@@ -56,22 +56,10 @@ export default function SpinningWheel() {
     setMustSpin(false);
     setShowWinner(true); // Show winner wedge when spinning stops
   }
+
   
-  const wedgeDeg = 360 / data.length;
-  const centerX = 220;
-  const centerY = 220;
-  const radius = 215; // Larger radius to cover the entire opening
-  
-  // Wedge centered at -44 degrees (pointing right in the opening)
-  const startAngle = -44 - wedgeDeg / 2;
-  const endAngle = -44 + wedgeDeg / 2;
-  const wedgePath = createWedgePath(centerX, centerY, radius, startAngle, endAngle);
-  
-  // Calculate text position (middle of the wedge)
-  const textAngle = -44;
-  const textDistance = radius * 0.7;
-  const textX = centerX + textDistance * Math.cos((textAngle * Math.PI) / 180);
-  const textY = centerY + textDistance * Math.sin((textAngle * Math.PI) / 180);
+
+
    
   return (
     <div
