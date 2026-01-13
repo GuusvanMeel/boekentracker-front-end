@@ -9,7 +9,7 @@ export default function HomePage() {
   return (
     <Layout title="Leeslijst">
       <CurrentBooks />
-      <SpinWheel />
+      {/* <SpinWheel /> */}
       <ReadingCalendar />
     </Layout>
   );
