@@ -164,7 +164,7 @@ export function SpinWheel() {
                 triggered.current = false;
               }}
               style={{
-                touchAction: "pan-y",
+                touchAction: "none",
                 userSelect: "none",
               }}
             >
