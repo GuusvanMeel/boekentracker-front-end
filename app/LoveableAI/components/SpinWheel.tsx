@@ -39,8 +39,8 @@ export function SpinWheel() {
   const MAX_HORIZONTAL_DRIFT = 60;
 
   // Create wheel data from books
-  const data = wantToReadBooks.map((book) => ({
-    option: book.title
+  const data = wantToReadBooks.map((book, index) => ({
+    option: `${index + 1}`
   }));
 
   const createConfetti = useCallback((book: Book) => {
@@ -129,7 +129,9 @@ export function SpinWheel() {
         <div>
           <div className="flex justify-center mb-4">
             <div 
-              className="relative w-full max-w-110 aspect-square"
+              className="relative"
+              style={{ width: "100%", maxWidth: "440px", touchAction: "none",
+                userSelect: "none", }}
               onPointerDown={(e) => {
                 const rect = e.currentTarget.getBoundingClientRect();
                 const x = e.clientX - rect.left;
@@ -150,7 +152,11 @@ export function SpinWheel() {
                 const dx = Math.abs(e.clientX - startX.current);
                 if (dy > SPIN_SWIPE_PX && dx < MAX_HORIZONTAL_DRIFT) {
                   triggered.current = true;
+                  e.preventDefault(); // Prevent page scroll
                   handleSpinClick();
+                } else if (Math.abs(dy) > 5) {
+                  // If moving vertically on right side, prevent scroll
+                  e.preventDefault();
                 }
               }}
               onPointerUp={() => {
@@ -163,40 +169,56 @@ export function SpinWheel() {
                 startX.current = null;
                 triggered.current = false;
               }}
-              style={{
-                touchAction: "none",
-                userSelect: "none",
-              }}
-            >
-              <div className="absolute inset-0" style={{ 
-                transform: "rotate(44deg)", 
-                transformOrigin: "center" 
-              }}>
-                <Wheel
-                  mustStartSpinning={mustSpin}
-                  prizeNumber={prizeNumber}
-                  data={data}
-                  fontSize={10}
-                  spinDuration={0.3}
-                  backgroundColors={['silver', 'white']}
-                  radiusLineWidth={5}
-                  radiusLineColor='gray'
-                  onStopSpinning={handleStopSpinning}
-                  pointerProps={{style:{visibility: "hidden"}}}
-                  disableInitialAnimation={true}
-                />
-              </div>
-              
-              <div className="absolute inset-0 pointer-events-none z-10">
-                <WheelOverlay totalOptions={wantToReadBooks.length} />
-              </div>
             
-              {showWinner && selectedBook && (
-                <WinnerWedge 
-                  totalOptions={wantToReadBooks.length} 
-                  winnerName={data[prizeNumber].option}
-                />
-              )}
+            >
+              <div style={{ 
+                position: "relative",
+                width: "100%",
+                paddingBottom: "100%"
+              }}>
+                <div style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  transform: "rotate(44deg)",
+                  transformOrigin: "center"
+                }}>
+                  <Wheel
+                    mustStartSpinning={mustSpin}
+                    prizeNumber={prizeNumber}
+                    data={data}
+                    fontSize={10}
+                    spinDuration={0.3}
+                    backgroundColors={['silver', 'white']}
+                    radiusLineWidth={5}
+                    radiusLineColor='gray'
+                    onStopSpinning={handleStopSpinning}
+                    pointerProps={{style:{visibility: "hidden"}}}
+                    disableInitialAnimation={true}
+                  />
+                </div>
+                
+                <div style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  pointerEvents: "none",
+                  zIndex: 10
+                }}>
+                  <WheelOverlay totalOptions={wantToReadBooks.length} />
+                </div>
+              
+                {showWinner && selectedBook && (
+                  <WinnerWedge 
+                    totalOptions={wantToReadBooks.length} 
+                    winnerName={`${prizeNumber + 1}`}
+                  />
+                )}
+              </div>
             </div>
           </div>
           
