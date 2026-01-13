@@ -18,14 +18,11 @@ const statusFilters: { value: BookStatus | 'all'; label: string }[] = [
 export default function LibraryPage() {
   const { books } = useBooks();
   const [activeFilter, setActiveFilter] = useState<BookStatus | 'all'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
 
   const filteredBooks = books.filter((book) => {
     const matchesStatus = activeFilter === 'all' || book.status === activeFilter;
-    const matchesSearch = searchQuery === '' || 
-      book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      book.author.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesStatus && matchesSearch;
+    
+    return matchesStatus;
   });
 
   return (
