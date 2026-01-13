@@ -2,13 +2,14 @@
   "name": "boekentracker-front-end",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+   "scripts": {
+    "dev": "next dev --turbo",
+    "build": "next build --webpack",
+    "start": "next start -p 3001",
     "lint": "eslint"
   },
   "dependencies": {
+    "@ducanh2912/next-pwa": "^10.2.9",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.562.0",

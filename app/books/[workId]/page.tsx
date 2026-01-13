@@ -5,7 +5,7 @@ import AddBookButton from "@/app/components/addbookbutton";
 import { ChevronLeft } from "lucide-react";
 import BackToHomeButton from "@/app/components/BackToHomeButton";
 
-export async function getBookDetails(workId: string): Promise<Book | null> {
+async function getBookDetails(workId: string): Promise<Book | null> {
   try {
     const url = `${
       process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
