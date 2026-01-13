@@ -1,8 +1,8 @@
 "use client"
 import { useRef, useState } from 'react';
-import { Wheel } from 'react-custom-roulette-r19';
 import { WheelOverlay } from './wheelOverlay';
 import WinnerWedge from './WinnerWedge';
+import dynamic from 'next/dynamic';
 
 // Helper function to create a wedge path
 function createWedgePath(centerX: number, centerY: number, radius: number, startAngle: number, endAngle: number) {
@@ -18,7 +18,11 @@ function createWedgePath(centerX: number, centerY: number, radius: number, start
   
   return `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
 }
-
+const Wheel = dynamic(
+  () =>
+    import("react-custom-roulette-r19").then((mod) => mod.Wheel),
+  { ssr: false }
+);
 export default function SpinningWheel() {
   const [count, setCount] = useState(6);
   const options = Array.from({ length: count }, (_, i) => `${i + 1}`);
@@ -26,6 +30,7 @@ export default function SpinningWheel() {
   const data = options.map((option) => ({
     option    
   }));
+  
   
   const [mustSpin, setMustSpin] = useState(false);
   const [prizeNumber, setPrizeNumber] = useState(0);

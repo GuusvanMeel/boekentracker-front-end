@@ -1,8 +1,12 @@
+"use client"
 import React, { useId, useMemo } from 'react';
 
 function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
   const rad = (angleDeg * Math.PI) / 180;
-  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+  // Round to prevent hydration mismatches
+  const x = Math.round((cx + r * Math.cos(rad)) * 1000) / 1000;
+  const y = Math.round((cy + r * Math.sin(rad)) * 1000) / 1000;
+  return { x, y };
 }
 
 function wedgePath(cx: number, cy: number, r: number, start: number, end: number) {
