@@ -15,14 +15,32 @@ import {
 } from 'date-fns';
 import { nl } from 'date-fns/locale';
 import { cn } from '../lib/utils';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export function ReadingCalendar() {
   const { books } = useBooks();
   const router = useRouter();
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const searchParams = useSearchParams();
   
-  const today = new Date();
+  const monthParam = searchParams.get('month');
+
+const [currentMonth, setCurrentMonth] = useState(() => {
+  if (monthParam) {
+    const [year, month] = monthParam.split('-').map(Number);
+    return new Date(year, month - 1);
+  }
+
+  return new Date();
+});
+
+const changeMonth = (date: Date) => {
+  setCurrentMonth(date);
+
+  const params = new URLSearchParams(searchParams.toString());
+  params.set('month', format(date, 'yyyy-MM'));
+
+  router.replace(`?${params.toString()}`, { scroll: false });
+};
 
   // Get books with events (start or end dates) for the current month
   const bookEvents = useMemo(() => {
@@ -54,13 +72,17 @@ export function ReadingCalendar() {
 
   const weekDays = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
 
-  const goToPreviousMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
-  };
+ const goToPreviousMonth = () => {
+  changeMonth(
+    new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1)
+  );
+};
 
-  const goToNextMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
-  };
+const goToNextMonth = () => {
+  changeMonth(
+    new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1)
+  );
+};
 
   return (
     <section className="mb-8">

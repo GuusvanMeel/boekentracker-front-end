@@ -6,10 +6,24 @@ import { QuickActions } from './QuickActions';
 
 
 export function CurrentBooks() {
-  const { getBooksByStatus} = useBooks();
+  const { getBooksByStatus, loading } = useBooks();
   const readingBooks = getBooksByStatus('reading');
 
+ if (loading) {
+    return (
+      <section className="mb-8">
+        <h2 className="font-serif text-xl font-medium mb-4">
+          Huidige boeken
+        </h2>
 
+        <div className="book-card text-center py-8">
+          <p className="text-muted-foreground">
+            Boeken laden...
+          </p>
+        </div>
+      </section>
+    );
+  }
   if (readingBooks.length === 0) {
     return (
       <section className="mb-8">
