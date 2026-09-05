@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useBooks } from '../contexts/BookContext';
 import { ChevronLeft, ChevronRight, BookOpen, CheckCircle2 } from 'lucide-react';
 import { 
@@ -15,32 +15,35 @@ import {
 } from 'date-fns';
 import { nl } from 'date-fns/locale';
 import { cn } from '../lib/utils';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 export function ReadingCalendar() {
   const { books } = useBooks();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  
-  const monthParam = searchParams.get('month');
 
-const [currentMonth, setCurrentMonth] = useState(() => {
-  if (monthParam) {
-    const [year, month] = monthParam.split('-').map(Number);
-    return new Date(year, month - 1);
-  }
+  const [currentMonth, setCurrentMonth] = useState(() => new Date());
 
-  return new Date();
-});
+  useEffect(() => {
+    const monthParam = new URLSearchParams(window.location.search).get('month');
 
-const changeMonth = (date: Date) => {
-  setCurrentMonth(date);
+    if (monthParam) {
+      const [year, month] = monthParam.split('-').map(Number);
+      setCurrentMonth(new Date(year, month - 1));
+    }
+  }, []);
 
-  const params = new URLSearchParams(searchParams.toString());
-  params.set('month', format(date, 'yyyy-MM'));
+  const changeMonth = (date: Date) => {
+    setCurrentMonth(date);
 
-  router.replace(`?${params.toString()}`, { scroll: false });
-};
+    const params = new URLSearchParams(window.location.search);
+    params.set('month', format(date, 'yyyy-MM'));
+
+    window.history.replaceState(
+      null,
+      '',
+      `?${params.toString()}`
+    );
+  };
 
   // Get books with events (start or end dates) for the current month
   const bookEvents = useMemo(() => {
@@ -72,17 +75,17 @@ const changeMonth = (date: Date) => {
 
   const weekDays = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
 
- const goToPreviousMonth = () => {
-  changeMonth(
-    new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1)
-  );
-};
+  const goToPreviousMonth = () => {
+    changeMonth(
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1)
+    );
+  };
 
-const goToNextMonth = () => {
-  changeMonth(
-    new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1)
-  );
-};
+  const goToNextMonth = () => {
+    changeMonth(
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1)
+    );
+  };
 
   return (
     <section className="mb-8">
