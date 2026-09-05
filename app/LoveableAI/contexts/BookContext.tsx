@@ -58,31 +58,34 @@ export function BookProvider({ children }: { children: ReactNode }) {
           const userBooks = data.items || [];
           
           // Fetch book details for each user book
-          const booksWithDetails = await Promise.all(
-            userBooks.map(async (userBook: any) => {
-              try {
-                const workId = userBook.bookKey?.replace('/works/', '') || userBook.bookKey;
-                const bookResponse = await fetch(`/api/book-details/${workId}`);
-                
-                if (bookResponse.ok) {
-                  const bookData = await bookResponse.json();
-                  const baseBook = bookData.book as BaseBook;
-                  
-                  if (baseBook) {
-                    return toBookWithStatus(
-                      baseBook,
-                      mapStatusToBookStatus(userBook.status || 'WANT'),
-                      userBook.addedAt,
-                      userBook.endDate
-                    );
-                  }
-                }
-              } catch (error) {
-                console.error('Error fetching book details:', error);
-              }
-              return null;
-            })
-          );
+          const booksWithDetails: Book[] = [];
+
+for (const userBook of userBooks) {
+  try {
+    const workId =
+      userBook.bookKey?.replace('/works/', '') || userBook.bookKey;
+
+    const bookResponse = await fetch(`/api/book-details/${workId}`);
+
+    if (bookResponse.ok) {
+      const bookData = await bookResponse.json();
+      const baseBook = bookData.book as BaseBook;
+
+      if (baseBook) {
+        booksWithDetails.push(
+          toBookWithStatus(
+            baseBook,
+            mapStatusToBookStatus(userBook.status || 'WANT'),
+            userBook.addedAt,
+            userBook.endDate
+          )
+        );
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching book details:', error);
+  }
+}
           
           setBooks(booksWithDetails.filter((b): b is Book => b !== null));
         }

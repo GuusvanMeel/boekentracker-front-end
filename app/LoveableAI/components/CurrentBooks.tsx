@@ -4,7 +4,6 @@ import { useBooks } from '../contexts/BookContext';
 import { BookCard } from './BookCard';
 import { QuickActions } from './QuickActions';
 
-import { toast } from 'sonner';
 
 export function CurrentBooks() {
   const { getBooksByStatus} = useBooks();

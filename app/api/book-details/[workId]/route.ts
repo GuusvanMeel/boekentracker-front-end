@@ -5,7 +5,8 @@ import { getTopGenresFromSubjects } from "@/utils/genre";
 const WORK_URL = "https://openlibrary.org/works";
 const SEARCH_URL = "https://openlibrary.org/search.json";
 async function fetchAuthorName(authorKey: string): Promise<string | null> {
-  
+  try{
+    
   const res = await fetch(`https://openlibrary.org${authorKey}.json`, {
     headers: {
       Accept: "application/json",
@@ -20,17 +21,26 @@ async function fetchAuthorName(authorKey: string): Promise<string | null> {
   
   return data.name ?? null;
 }
+catch(error)
+  {
+    console.error(`Failed to fetch author ${authorKey}:`, error);
+    return null;
+}
+}
+
 
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ workId: string }> }
 ) {
+  
   const { workId: rawWorkId } = await params;
   const workId = rawWorkId.replace("/works/", "").trim();
-
+try{
   /* -------------------------
      1️⃣ Fetch WORK data
   --------------------------*/
+  console.log(`[${workId}] WORK start`);
   const workRes = await fetch(`${WORK_URL}/${workId}.json`, {
     headers: {
       Accept: "application/json",
@@ -38,7 +48,7 @@ export async function GET(
     },
     cache: "no-store",
   });
-
+  console.log(`[${workId}] WORK success`);
   if (!workRes.ok) {
     return NextResponse.json({ book: null }, { status: 200 });
   }
@@ -48,6 +58,7 @@ export async function GET(
   /* -------------------------
      2️⃣ Fetch ONE EDITION
   --------------------------*/
+  console.log(`[${workId}] EDITION start`);
   const editionUrl = new URL(SEARCH_URL);
   editionUrl.searchParams.set("q", `key:/works/${workId}`);
   editionUrl.searchParams.set("limit", "1");
@@ -63,7 +74,7 @@ export async function GET(
     },
     cache: "no-store",
   });
-
+console.log(`[${workId}] EDITION success`);
   const editionData = editionRes.ok ? await editionRes.json() : null;
   const edition = editionData?.docs?.[0] ?? {};
   const authorKeys =
@@ -113,4 +124,15 @@ const authors = (
   };
 
   return NextResponse.json({ book });
+}
+catch(error){
+  {
+    console.error(`[${workId}] BOOK DETAILS failed`);
+
+    return NextResponse.json(
+      { book: null, error: "Failed to fetch book details" },
+      { status: 503 }
+    );
+  }
+}
 }
